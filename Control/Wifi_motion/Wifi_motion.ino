@@ -1,5 +1,7 @@
 #include <WiFi.h>
 #include <WiFiUdp.h>
+#include <WiFiClient.h>
+#include <WiFiAP.h>
 
 // Motor A (left) connections
 #define enA 14
@@ -15,14 +17,16 @@
 
 // WIFI VARIABLES
 // WiFi network name and password:
-const char * networkName = "Galaxy A34";
-const char * networkPswd = "1234567@";
+const char *ssid = "ESP_T1";
+const char *password = "1234567";
 
 //IP address to send UDP data to:
 // either use the ip address of the server or 
 // a network broadcast address
-const char * udpAddress = "192.168.84.158";
+const char *udpAddress = "192.168.84.158";
 const int udpPort = 8888;
+
+WiFiServer server(80);
 
 //Are we currently connected?
 boolean connected = false;

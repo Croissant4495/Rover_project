@@ -53,7 +53,7 @@ void fromBytes(unsigned char *byteArray, short int* mode, short int* motion){
   *mode = (short int)(byteArray[1] << 8 | byteArray[0]);
 }
 
-
+z
 void setup(){
   // Initilize hardware serial:
   Serial.begin(9600);
