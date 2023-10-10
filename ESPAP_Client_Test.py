@@ -4,25 +4,22 @@ import errno
 import keyboard
 
 # General config
-UDP_IP = "192.168.4.1"
-UDP_PORT = 8888
-MESSAGE_LENGTH = 7  # one data frame has 7 bytes
+server_ip = "192.168.4.1"
+server_port = 8888
+MESSAGE_LENGTH = 8  # one data frame has 7 bytes
 
 # Prepare UDP
-sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-sock.connect((UDP_IP, UDP_PORT))  # connect to server's ip and a port number
+sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+sock.connect((server_ip, server_port)) # connect to server's ip and a port number
 
 take_input = True
 
-def take_input():
-    take_input = True
-
-
 # Read data forever
 while True:
-    keyboard.on_press_key("s", lambda _:take_input)
+    if keyboard.is_pressed('s'):
+         take_input = True
     
-    # Send data
+    # Send dat
     if take_input:
                 mode = int(input("Enter an int: "))
                 speed1 = int(input("Enter speed1: "))
@@ -34,8 +31,8 @@ while True:
     try:
         data, fromAddr = sock.recvfrom(MESSAGE_LENGTH)
         if data:
-            Mode = struct.unpack_from('<h', data,0)
-            print("Mode: {}".format(Mode))
+            rcv_mode = struct.unpack_from('<h', data,0)
+            print("Mode: {}".format(rcv_mode))
 
     except socket.error as why:
         if why.args[0] == errno.EWOULDBLOCK:

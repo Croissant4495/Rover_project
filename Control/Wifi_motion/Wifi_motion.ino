@@ -1,7 +1,9 @@
 #include <WiFi.h>
-#include <WiFiUdp.h>
 #include <WiFiClient.h>
 #include <WiFiAP.h>
+
+// WIFI
+#define rcv_message_length 6
 
 // Motor A (left) connections
 #define enA 14
@@ -28,15 +30,8 @@ const int udpPort = 8888;
 
 WiFiServer server(80);
 
-//Are we currently connected?
-boolean connected = false;
-
-//The udp library class
-WiFiUDP udp;
-
 // Recieved Data
 short int mode = 7;
-short int motion;
 
 unsigned char packetBuffer[255]; //buffer to hold incoming packet
 unsigned char sendArray[255];
@@ -134,73 +129,56 @@ void loop(){
   if(connected){
     send_packet();
   }
-  received_packet();
+  recv_bytes();
 
   motion_call();
 }
 
 // WIFI
-void toBytes(unsigned char *byteArray, short int mode) {
-    // mode
-    byteArray[0] = (unsigned char)(mode & 0xFF); 
+void start_server(){
+  // Setting up access point
+  if (!WiFi.softAP(ssid, password)) {
+    log_e("Soft AP creation failed.");
+    while(1);
+  }
+  IPAddress myIP = WiFi.softAPIP();
+  Serial.print("AP IP address: ");
+  Serial.println(myIP);
+  server.begin();
+
+  Serial.println("Server started");
 }
 
-void fromBytes(unsigned char *byteArray, short int* mode, short int* speed1, short int* speed2){
+void toBytes(unsigned char *byteArray, short int var1) {
+    // mode
+    byteArray[0] = (unsigned char)(var1 & 0xFF); 
+}
+
+void fromBytes(unsigned char *byteArray, short int* var1, short int* var2, short int* var3){
   // mode
-  *mode = (short int)(byteArray[1] << 8 | byteArray[0]);
+  *var1 = (short int)(byteArray[1] << 8 | byteArray[0]);
   // speed1
-  *speed1 = (short int)(byteArray[3] << 8 | byteArray[2]);
+  *var2 = (short int)(byteArray[3] << 8 | byteArray[2]);
   // speed2
-  *speed2 = (short int)(byteArray[5] << 8 | byteArray[4]);
+  *var3 = (short int)(byteArray[5] << 8 | byteArray[4]);
 }
 
 void send_packet(){
     toBytes(sendArray, mode);
-    udp.beginPacket(udpAddress,udpPort);
-    udp.write(sendArray, 7);
-    udp.endPacket();
+
 }
 
-void received_packet(){
-  int size = 0;
-  size = udp.parsePacket();
-  if (size){
-    Serial.println(size);
-    udp.read(packetBuffer, 255);
-    fromBytes(packetBuffer, &mode, &speed1, &speed2);
-    Serial.println(mode);
+void recv_bytes(WiFiClient* client){
+  for (int i = 0; i<= rcv_message_length; i++){
+    packetBuffer[i] = *client.read();
   }
-}
-
-void connectToWiFi(const char * ssid, const char * pwd){
-  Serial.println("Connecting to WiFi network: " + String(ssid));
-  // delete old config
-  WiFi.disconnect(true);
-  //register event handler
-  WiFi.onEvent(WiFiEvent);
-  //Initiate connection                                                                                                
-  WiFi.begin(ssid, pwd);
-  Serial.println("Waiting for WIFI connection...");
-}
-
-//wifi event handler
-void WiFiEvent(WiFiEvent_t event){
-    switch(event) {
-      case ARDUINO_EVENT_WIFI_STA_GOT_IP:
-          //When connected set 
-          Serial.print("WiFi connected! IP address: ");
-          Serial.println(WiFi.localIP());  
-          //initializes the UDP state
-          //This initializes the transfer buffer
-          udp.begin(WiFi.localIP(),udpPort);
-          connected = true;
-          break;
-      case ARDUINO_EVENT_WIFI_STA_DISCONNECTED:
-          Serial.println("WiFi lost connection");
-          connected = false;
-          break;
-      default: break;
-    }
+  fromBytes(packetBuffer, &mode, &speed1, &speed2);
+  Serial.print("Mode: ");
+  Serial.println(mode);
+  Serial.print("Speed1: ");
+  Serial.println(speed1);
+  Serial.print("Speed2: ");
+  Serial.println(speed2);
 }
 
 // MOTION
