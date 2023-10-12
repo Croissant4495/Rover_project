@@ -174,20 +174,7 @@ def detect_pink(x,y,image):
         flag=False
     image=cv2.cvtColor(image,cv2.COLOR_HSV2BGR)
     return flag,image
-def detect_white(x,y,image):
-    flag=False
-    white=[255,255,255]
-    lower_limit,upper_limit=get_limits(white)
-    image=cv2.cvtColor(image,cv2.COLOR_BGR2HSV)
-    hsv_value=image[y,x]  
-    if hsv_value[0]>=lower_limit[0] and hsv_value[0]<=upper_limit[0]:
-        if hsv_value[1]>=lower_limit[1] and hsv_value[1]<=upper_limit[1]:
-            if hsv_value[2]>=lower_limit[2] and hsv_value[2]<=upper_limit[2]:
-                flag=True
-    else :
-        flag=False
-    image=cv2.cvtColor(image,cv2.COLOR_HSV2BGR)
-    return flag,image
+
 def detect_black(x,y,image):
     flag=False
     black=[0,0,0]
@@ -243,10 +230,7 @@ def detection(x,y,image):
     if flag:
         string="orange"
         return string,image
-    flag,image=detect_white(x,y,image)
-    if flag:
-        string="white"
-        return string,image
+
     flag,image=detect_black(x,y,image)
     
     if flag:
@@ -288,6 +272,7 @@ def editing_image(img):
     imgContour=img.copy()
     
   imgBlur = cv2.GaussianBlur(img, (7, 7), 1) #removing noise
+#   imgBlur=cv2.medianBlur(img, ksize=(5, 5))
   imgGray = cv2.cvtColor(imgBlur, cv2.COLOR_BGR2GRAY)
 
   imgCanny = cv2.Canny(imgGray,10,200) # detecting edges
@@ -298,11 +283,6 @@ def editing_image(img):
   
   return imgDil,imgContour
 def find_contours(img):
-  global time_
-  even=0
-  start = timer()
-
-
   global flag_triangles,time_triangles
   global stars,squares,circles,triangles,rectangles,x,y,x1,y1
   stars=squares=circles=triangles=rectangles=0   # every time I call the function-> new counter
@@ -335,8 +315,10 @@ def find_contours(img):
     # if (contor_counter%30==0):
       # print(cnt)
     area = cv2.contourArea(cnt)
-    if area < 700:
+   
+    if area < 1000 :
       continue
+    print(area)
     peri = cv2.arcLength(cnt, True) 
     approx = cv2.approxPolyDP(cnt, 0.02 * peri, True) #number of points
     x , y , w, h = cv2.boundingRect(approx)
@@ -344,7 +326,7 @@ def find_contours(img):
     y1 = approx.ravel()[1]
     ratio=w/h
     
-    cv2.drawContours(imgContour, approx, -1, (0, 0, 0), 2)
+    # cv2.drawContours(imgContour, approx, -1, (0, 0, 0), 2)
     length=len(approx)
     here=0
     if length==4:
@@ -381,6 +363,50 @@ def find_contours(img):
         color_array.append(flag)
 
     cv2.rectangle(imgContour, (x , y ), (x + w , y + h ), (0, 0, 0), 3)
-  end = timer()
-  time_+= end-start
+ 
   return imgContour,x1,y1,color_array,triangles,squares,rectangles,circles,stars
+cap=cv2.VideoCapture(0)
+
+tri=sq=rec=cir=sta=0
+
+color=[]
+# while True:
+#     rets,frames=cap.read()
+#     if not rets:
+#         break
+#     cv2.imshow("img",frames)
+    
+#     flag=1
+    
+#     if flag==1:
+#         img,x,y,c,_,_,_,_,_=find_contours(frames)
+#         color.append(c)
+#         # tri+=triangles
+#         # sq+=squares
+#         # rec+=rectangles
+#         # cir+=circles
+#         # sta+=stars
+    
+#     key=cv2.waitKey(33)
+#     if key==27:
+#         break
+# cap.release()
+# cv2.destroyAllWindows()
+# # print(tri,sq,cir,sta,rec)
+# for c in color:
+#     if len(c)>=1:
+        
+#      color_count(c[0])
+    
+# print(red,black,blue,green,yellow,white,purple,pink,orange)
+# image=cv2.imread("6.png")
+# img,_=editing_image(image)
+# cv2.imshow("image",image)
+# cv2.imshow("img",img)
+# cv2.waitKey(0)
+# cv2.destroyAllWindows()
+
+
+
+
+
