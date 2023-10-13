@@ -2,6 +2,7 @@
 #include <WiFi.h>
 #include <WiFiClient.h>
 #include <WiFiAP.h>
+#include <Servo.h>
 
 //_________Definitions_________
 // WIFI
@@ -19,7 +20,11 @@
 #define encoder1 34
 #define encoder2 35
 // Servo pin
-#define servo 0
+#define servo 18
+//Ultrasonic connections
+#define trigPin 4
+#define echoPin 2
+
 
 // _________WIFI_VARIABLES_________
 const char *ssid = "ESP_t1";
@@ -40,21 +45,26 @@ volatile unsigned int counter2 = 0;
 int rpm2 = 0;
 static volatile unsigned long debounce = 0;
 
+long duration;
+short int distance;
+
 int time_old;
 int time_new;
 float dt;
 
 short int mode = 7;
+short int gripper_mode = 0;
 
 // Motor values
 float factor = 1;
 short int speed1 = 100;
 short int speed2 = 100;
 
+Servo my_servo;
 
 //_________WIFI_functions_________
 void toBytes(unsigned char *byteArray, short int var1);
-void fromBytes(unsigned char *byteArray, short int* var1, short int* var2, short int* var3);
+void fromBytes(unsigned char *byteArray, short int* var1, short int* var2, short int* var3, short int* var4);
 void start_server();
 
 void send_packet();
@@ -63,7 +73,7 @@ void recv_bytes(WiFiClient* client_ptr);
 //_________Move_functions_________
 void forward();
 void stop();
-void get_dist();
+int get_dist();
 
 void update_time();
 void get_rpm();
@@ -89,6 +99,9 @@ void setup(){
   pinMode(in2, OUTPUT);
   pinMode(in3, OUTPUT);
   pinMode(in4, OUTPUT);
+
+  pinMode(servo, OUTPUT);
+  my_servo.attach(servo);
 
   // //set encoder pins
   // pinMode(encoder1, INPUT_PULLUP);
@@ -123,8 +136,7 @@ void loop(){
     Serial.println("New Client");
     while(client.connected()){
       // main loop
-
-      if (client.available() >= 6){
+      if (client.available() >= 8){
         recv_bytes(&client);
       }
       motion_call();
@@ -155,13 +167,15 @@ void toBytes(unsigned char *byteArray, short int var1) {
     byteArray[0] = (unsigned char)(var1 & 0xFF); 
 }
 
-void fromBytes(unsigned char *byteArray, short int* var1, short int* var2, short int* var3){
+void fromBytes(unsigned char *byteArray, short int* var1, short int* var2, short int* var3, short int* var4){
   // mode
   *var1 = (short int)(byteArray[1] << 8 | byteArray[0]);
   // speed1
   *var2 = (short int)(byteArray[3] << 8 | byteArray[2]);
   // speed2
   *var3 = (short int)(byteArray[5] << 8 | byteArray[4]);
+  // speed2
+  *var4 = (short int)(byteArray[7] << 8 | byteArray[6]);
 }
 
 void send_packet(){
@@ -172,13 +186,15 @@ void recv_bytes(WiFiClient* client_ptr){
   for (int i = 0; i<= rcv_message_length; i++){
     packetBuffer[i] = client_ptr->read();
     }
-  fromBytes(packetBuffer, &mode, &speed1, &speed2);
+  fromBytes(packetBuffer, &mode, &speed1, &speed2, &gripper_mode);
   Serial.print("Mode: ");
   Serial.println(mode);
   Serial.print("Speed1: ");
   Serial.println(speed1);
   Serial.print("Speed2: ");
   Serial.println(speed2);
+  Serial.print("Gripper_mode: ");
+  Serial.println(gripper_mode);
 }
 
 //_________MOTION_________
@@ -209,7 +225,7 @@ void turn_right() {
 void turn_left() {
   // set speed of movement
   analogWrite(enA, 0);
-  analogWrite(enB, speed2));
+  analogWrite(enB, speed2);
 
   // set both motors to forward
   digitalWrite(in1, LOW);
@@ -247,6 +263,24 @@ void get_rpm() {
   }
 }
 
+int get_dist(){
+    // Clears the trigPin
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  // Sets the trigPin on HIGH state for 10 micro seconds
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+  // Reads the echoPin, returns the sound wave travel time in microseconds
+  duration = pulseIn(echoPin, HIGH);
+  // Calculating the distance
+  distance = duration * 0.034 / 2;
+  return distance;
+}
+
+void move_servo(int speed){
+  my_servo.write(speed)
+}
 void motion_call(){
   if (mode == 1){
     forward();
@@ -256,6 +290,14 @@ void motion_call(){
     turn_left();
   }else if(mode == 0){
     stop();
+  }
+
+  if (gripper_mode == 2){
+    move_servo(135);
+  }else if(gripper_mode == 1){
+    move_servo(45);
+  }else{
+    move_servo(90);
   }
 }
 
