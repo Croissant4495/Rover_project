@@ -2,6 +2,7 @@ import socket
 import struct
 import errno
 import Keyboard_handle
+import line_track
 
 # General config
 server_ip = "192.168.4.1"
@@ -33,10 +34,16 @@ def recieve()->int:
 while True:    
     # Send data
     data_arr = Keyboard_handle.decide_mode()
-    sock.send(struct.pack('<hhhh', *data_arr))
+    if data_arr[0] == 5:
+        line_track.move_line()
+    else:
+        sock.send(struct.pack('<hhhh', *data_arr))
 
     # Try recieving data
-    us_distance = recieve()
+    try:
+        us_distance = recieve()
+    except:
+        pass
 
 # Close the socket when done
 sock.close()
