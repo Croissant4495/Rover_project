@@ -51,14 +51,13 @@ def remove_background(image):
     image=cv2.bitwise_not(image)
     return image
 # cap=cv2.VideoCapture('http://192.168.1.9:4747/video')
-cap=cv2.VideoCapture("track.mp4")
-cap.set(3, 160)
-cap.set(4, 120)
+
+
 x=1
 def control():
     global x
     # cap=cv2.VideoCapture("track.mp4")
-    cap=cv2.VideoCapture('http://192.168.1.9:4747/video')
+    cap=cv2.VideoCapture('http://192.168.185.174:8080/video')
     while True:
         ret,frame=cap.read()
         
@@ -112,4 +111,5 @@ def control():
             break
     cap.release()
     cv2.destroyAllWindows()
-    print(frame.shape)
+    # print(frame.shape)
+control()
