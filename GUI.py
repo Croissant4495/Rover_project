@@ -30,17 +30,28 @@ import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5 import QtCore, QtGui, QtWidgets
 
+"""
+index -> button
+0 -> Forward
+1 -> backward
+2 -> right
+3 -> left
+4 -> gripper_open
+5 -> gripper_close
+"""
+buttons_status = [0, 0, 0, 0, 0, 0]
+
 class Ui_Form(object):
     def hi():
         return "hi"
     def forward(self):
-       print(control(1))
+       buttons_status[0] = 1
     def backward(self):
-        print(control(2))
+        buttons_status[1] = 1
     def right (self):
-        print(control(3))
+        buttons_status[2] = 1
     def left(self):
-        print(control(4))
+        buttons_status[3] = 1
 
     def open_controller(self):
         self.stackedWidget.setCurrentIndex(1)

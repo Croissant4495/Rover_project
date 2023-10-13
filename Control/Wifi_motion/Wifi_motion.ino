@@ -1,7 +1,9 @@
+//_________Libraries_________
 #include <WiFi.h>
 #include <WiFiClient.h>
 #include <WiFiAP.h>
 
+//_________Definitions_________
 // WIFI
 #define rcv_message_length 6
 
@@ -16,61 +18,49 @@
 // Encoder pins
 #define encoder1 34
 #define encoder2 35
+// Servo pin
+#define servo 0
 
-// WIFI VARIABLES
-// WiFi network name and password:
-const char *ssid = "ESP_T1";
-const char *password = "1234567";
+// _________WIFI_VARIABLES_________
+const char *ssid = "ESP_t1";
+const char *password = "12345678";
+const int localPort = 8888;
 
-//IP address to send UDP data to:
-// either use the ip address of the server or 
-// a network broadcast address
-const char *udpAddress = "192.168.84.158";
-const int udpPort = 8888;
+WiFiServer server(localPort);
 
-WiFiServer server(80);
-
-// Recieved Data
-short int mode = 7;
 
 unsigned char packetBuffer[255]; //buffer to hold incoming packet
 unsigned char sendArray[255];
 
 
-// MOTION VARIABLES
-//Variables
+//_________MOTION_VARIABLES_________
 volatile unsigned int counter1 = 0;
 int rpm1 = 0;
 volatile unsigned int counter2 = 0;
 int rpm2 = 0;
 static volatile unsigned long debounce = 0;
 
-int desired_speed = 200;
-
 int time_old;
 int time_new;
 float dt;
 
-// motor values
+short int mode = 7;
+
+// Motor values
 float factor = 1;
 short int speed1 = 100;
 short int speed2 = 100;
 
-// input reader
-float in_num = 0;
 
-// WIFI functions
-void toBytes(unsigned char *byteArray, short int mode);
-void fromBytes(unsigned char *byteArray, short int* mode, short int* speed1, short int* speed2);
-
-void connectToWiFi(const char * ssid, const char * pwd);
-void WiFiEvent(WiFiEvent_t event);
+//_________WIFI_functions_________
+void toBytes(unsigned char *byteArray, short int var1);
+void fromBytes(unsigned char *byteArray, short int* var1, short int* var2, short int* var3);
+void start_server();
 
 void send_packet();
-void received_packet();
+void recv_bytes(WiFiClient* client_ptr);
 
-
-// Move functions
+//_________Move_functions_________
 void forward();
 void stop();
 void get_dist();
@@ -78,9 +68,7 @@ void get_dist();
 void update_time();
 void get_rpm();
 
-void recv_serial();
-
-// Interrupt functions
+//_________Interrupt_functions_________
 void IRAM_ATTR countPulse1() {
   counter1++;
 }
@@ -116,25 +104,38 @@ void setup(){
 
   time_new = millis();
 
-  Serial.begin(9600);
-  //Connect to the WiFi network
-  connectToWiFi(networkName, networkPswd);
+  Serial.begin(115200);
+  Serial.print("Started program");
+  //Start server
+  start_server();
 }
 
 void loop(){
   update_time();
+
+  // Encoder
   // noInterrupts();
   // get_rpm();
   // interrupts();
-  if(connected){
-    send_packet();
-  }
-  recv_bytes();
 
-  motion_call();
+  WiFiClient client = server.available();
+  if(client){
+    Serial.println("New Client");
+    while(client.connected()){
+      // main loop
+
+      if (client.available() >= 6){
+        recv_bytes(&client);
+      }
+      motion_call();
+    }
+    Serial.println("Client dissconnected");
+  }else{
+    stop();
+  }
 }
 
-// WIFI
+// _________WIFI_________
 void start_server(){
   // Setting up access point
   if (!WiFi.softAP(ssid, password)) {
@@ -165,13 +166,12 @@ void fromBytes(unsigned char *byteArray, short int* var1, short int* var2, short
 
 void send_packet(){
     toBytes(sendArray, mode);
-
 }
 
-void recv_bytes(WiFiClient* client){
+void recv_bytes(WiFiClient* client_ptr){
   for (int i = 0; i<= rcv_message_length; i++){
-    packetBuffer[i] = *client.read();
-  }
+    packetBuffer[i] = client_ptr->read();
+    }
   fromBytes(packetBuffer, &mode, &speed1, &speed2);
   Serial.print("Mode: ");
   Serial.println(mode);
@@ -181,10 +181,10 @@ void recv_bytes(WiFiClient* client){
   Serial.println(speed2);
 }
 
-// MOTION
+//_________MOTION_________
 void forward() {
   // set speed of movement
-  analogWrite(enA, speed1 * factor);
+  analogWrite(enA, speed1);
   analogWrite(enB, speed2);
 
   // set both motors to forward
@@ -196,7 +196,7 @@ void forward() {
 
 void turn_right() {
   // set speed of movement
-  analogWrite(enA, speed1 * factor);
+  analogWrite(enA, speed1);
   analogWrite(enB, 0);
 
   // set both motors to forward
@@ -209,7 +209,7 @@ void turn_right() {
 void turn_left() {
   // set speed of movement
   analogWrite(enA, 0);
-  analogWrite(enB, speed2 * (1/factor));
+  analogWrite(enB, speed2));
 
   // set both motors to forward
   digitalWrite(in1, LOW);
@@ -247,28 +247,14 @@ void get_rpm() {
   }
 }
 
-void recv_serial(){
-  if (Serial.available() > 0) {
-    in_num= Serial.parseFloat();
-    if (in_num > 2){
-      if(in_num == 4 || in_num == 5 || in_num == 6 || in_num == 7){
-        mode = in_num;
-      }
-    }else{
-      factor = in_num;
-    }
-    Serial.println(in_num);
-  }
-}
-
 void motion_call(){
-  if (mode == 4){
+  if (mode == 1){
     forward();
-  }else if(mode == 5){
+  }else if(mode == 2){
     turn_right();
-  }else if(mode == 6){
+  }else if(mode == 3){
     turn_left();
-  }else if(mode == 7){
+  }else if(mode == 0){
     stop();
   }
 }
