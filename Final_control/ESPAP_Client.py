@@ -3,6 +3,7 @@ import struct
 import errno
 import Keyboard_handle
 import line_track
+import line_follower
 
 # General config
 server_ip = "192.168.4.1"
@@ -18,7 +19,7 @@ def recieve()->int:
     try:
         rcv_data, fromAddr = sock.recvfrom(MESSAGE_LENGTH)
         if data:
-            data = struct.unpack('<h', rcv_data)
+            data = struct.unpack('<c', rcv_data)
             print("Distance: {}".format(data))
             return data
 
@@ -39,11 +40,11 @@ while True:
     else:
         sock.send(struct.pack('<hhhh', *data_arr))
 
-    # Try recieving data
-    try:
-        us_distance = recieve()
-    except:
-        pass
+    # # Try recieving data
+    # try:
+    #     us_distance = recieve()
+    # except:
+    #     pass
 
 # Close the socket when done
 sock.close()

@@ -3,9 +3,9 @@ import keyboard
 # Name -> index
 button_dict = {
     "forward": 0,
-    "backward": 1,
+    "backward": 3,
     "right": 2,
-    "left": 3,
+    "left": 1,
     "gripper_open": 4,
     "gripper_close": 5,
     "line" : 6
@@ -22,12 +22,14 @@ def check_button():
         button_arr[2] = 1
     if keyboard.is_pressed("s"):
         button_arr[3] = 1
-    if keyboard.is_pressed("j"):
+    if keyboard.is_pressed("m"):
         button_arr[4] = 1
     if keyboard.is_pressed("n"):
         button_arr[5] = 1
-    if keyboard.is_pressed("m"):
+    if keyboard.is_pressed("l"):
         button_arr[6] = 1
+    if keyboard.is_pressed(";"):
+        button_arr[6] = 0
 
 
     return button_arr

@@ -55,9 +55,10 @@ x=1
 first_time = True
 def control():
     global x
+    global first_time
     # cap=cv2.VideoCapture("track.mp4")
     if first_time:
-        cap=cv2.VideoCapture('http://192.168.1.9:4747/video')
+        cap=cv2.VideoCapture('http://172.18.11.218:8080/video')
         first_time = False
 
     ret,frame=cap.read()

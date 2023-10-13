@@ -352,7 +352,7 @@ class Worker1(QThread):
     def run(self):
         self.ThreadActive = True
         
-        Capture=cv2.VideoCapture('http://172.18.11.218:8080/video')
+        Capture=cv2.VideoCapture('http://192.168.1.9:4747/video')
         # Capture=cv2.VideoCapture(0)
         while self.ThreadActive:
             global frame,ret

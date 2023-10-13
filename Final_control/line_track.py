@@ -5,6 +5,7 @@ mid_speed = 40
 max_speed = 60
 
 def move_line():
+    line_follower.control()
     motion = line_follower.get_x()
 
     # forward

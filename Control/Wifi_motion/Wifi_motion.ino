@@ -2,20 +2,19 @@
 #include <WiFi.h>
 #include <WiFiClient.h>
 #include <WiFiAP.h>
-#include <Servo.h>
 
 //_________Definitions_________
 // WIFI
 #define rcv_message_length 6
 
 // Motor A (left) connections
-#define enA 14
-#define in1 33
-#define in2 25
+#define enA 21
+#define in1 19
+#define in2 5
 // Motor B (right) connections
-#define enB 13
-#define in3 26
-#define in4 27
+#define enB 23
+#define in3 18
+#define in4 22
 // Encoder pins
 #define encoder1 34
 #define encoder2 35
@@ -60,7 +59,7 @@ float factor = 1;
 short int speed1 = 100;
 short int speed2 = 100;
 
-Servo my_servo;
+// Servo my_servo;
 
 //_________WIFI_functions_________
 void toBytes(unsigned char *byteArray, short int var1);
@@ -100,8 +99,8 @@ void setup(){
   pinMode(in3, OUTPUT);
   pinMode(in4, OUTPUT);
 
-  pinMode(servo, OUTPUT);
-  my_servo.attach(servo);
+  // pinMode(servo, OUTPUT);
+  // my_servo.attach(servo);
 
   // //set encoder pins
   // pinMode(encoder1, INPUT_PULLUP);
@@ -125,19 +124,14 @@ void setup(){
 
 void loop(){
   update_time();
-
-  // Encoder
-  // noInterrupts();
-  // get_rpm();
-  // interrupts();
-
   WiFiClient client = server.available();
   if(client){
     Serial.println("New Client");
     while(client.connected()){
       // main loop
-      if (client.available() >= 8){
+      if (client.available()>= 8){
         recv_bytes(&client);
+        client.flush();
       }
       motion_call();
     }
@@ -278,9 +272,9 @@ int get_dist(){
   return distance;
 }
 
-void move_servo(int speed){
-  my_servo.write(speed)
-}
+// void move_servo(int speed){
+//   my_servo.write(speed)
+// }
 void motion_call(){
   if (mode == 1){
     forward();
@@ -292,12 +286,12 @@ void motion_call(){
     stop();
   }
 
-  if (gripper_mode == 2){
-    move_servo(135);
-  }else if(gripper_mode == 1){
-    move_servo(45);
-  }else{
-    move_servo(90);
-  }
+  // if (gripper_mode == 2){
+  //   move_servo(135);
+  // }else if(gripper_mode == 1){
+  //   move_servo(45);
+  // }else{
+  //   move_servo(90);
+  // }
 }
 
