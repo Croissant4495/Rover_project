@@ -10,9 +10,16 @@ button_dict = {
     "gripper_close": 5,
     "line" : 6
 }
+button_array = [0, 0, 0, 0, 0, 0, 0]
 
-def check_button():
-    button_arr = [0, 0, 0, 0, 0, 0, 0]
+def reset_array(arr):
+    # Reset all except 6
+    for i in range(len(arr)):
+        if i != 6:
+            arr[i] = 0
+
+def check_button(button_arr):
+    reset_array(button_arr)
 
     if keyboard.is_pressed("w"):
         button_arr[0] = 1
@@ -35,7 +42,8 @@ def check_button():
     return button_arr
 
 def decide_mode():
-    arr = check_button()
+    global button_array
+    arr = check_button(button_array)
     # Forward
     min_speed = 0
     mid_speed = 60
