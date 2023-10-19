@@ -72,6 +72,26 @@ def remove_background(image):
     kernel=kernel = np.ones((5, 5), np.uint8)
     image=cv2.erode(image,kernel)
     return image
+def detect_line(image):
+    edges = cv2.Canny(image, 50, 150)
+    lines = cv2.HoughLinesP(edges, 1, np.pi / 180, 100, minLineLength=100, maxLineGap=10)
+    if lines is None:
+        return False
+    else:
+        return True
+def otsu2(image):
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    image = cv2.threshold(image, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
+    kernel=np.ones((5, 5), np.uint8)
+    contours = cv2.findContours(image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[0]
+
+   
+    smallest_contour = sorted(contours, key=cv2.contourArea, reverse=False)[0] # Find the largest contour in the image.
+    image=cv2.erode(image,kernel)
+    image=cv2.dilate(image,kernel)
+   
+    cv2.fillConvexPoly(image, smallest_contour, 0)
+    return image
 def detect_lines(image):
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     edges = cv2.Canny(gray, 50, 150)
@@ -112,14 +132,15 @@ def control():
         frame=frame[0:h, 0:w]
         # mask=remove_background(frame)
         # mask,_=detect_black(frame)
-        mask=black(frame)
+        mask=otsu2(frame)
         contours,hierachy=cv2.findContours(mask,1,cv2.CHAIN_APPROX_NONE)
         # print("here")
         w=round(w/4)
-        if len(contours)>0 :
+        if len(contours)>0 and detect_line(mask)==True :
             c=max(contours,key=cv2.contourArea)
             # if (cv2.contourArea(c)<1000):
             #     print("backwards")
+            #     continue
                 
             M=cv2.moments(c)
             if M["m00"]!=0: # contour is not empty
