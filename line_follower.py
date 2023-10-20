@@ -136,7 +136,8 @@ def control():
         contours,hierachy=cv2.findContours(mask,1,cv2.CHAIN_APPROX_NONE)
         # print("here")
         w=round(w/4)
-        if len(contours)>0 and detect_line(mask)==True :
+        #if len(contours)>0 and detect_line(mask)==True :
+        if len(contours)>0  :
             c=max(contours,key=cv2.contourArea)
             # if (cv2.contourArea(c)<1000):
             #     print("backwards")
