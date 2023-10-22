@@ -23,9 +23,9 @@ def check_button(button_arr):
 
     if keyboard.is_pressed("w"):
         button_arr[0] = 1
-    if keyboard.is_pressed("a"):
-        button_arr[1] = 1
     if keyboard.is_pressed("d"):
+        button_arr[1] = 1
+    if keyboard.is_pressed("a"):
         button_arr[2] = 1
     if keyboard.is_pressed("s"):
         button_arr[3] = 1
@@ -46,8 +46,8 @@ def decide_mode():
     arr = check_button(button_array)
     # Forward
     min_speed = 0
-    mid_speed = 60
-    max_speed = 120
+    mid_speed = 50
+    max_speed = 100
 
     if arr[button_dict["line"]]:
         # line track
@@ -80,6 +80,10 @@ def decide_mode():
             speed1 = min_speed
             speed2 = mid_speed
         # if none then stop
+        elif arr[button_dict["backward"]] == 1:
+            mode = 2
+            speed1 = max_speed
+            speed2 = max_speed       
         else:
             mode = 0
             speed1 = min_speed

@@ -5,9 +5,15 @@
 // _________WIFI_VARIABLES_________
 const char *ssid = "ESP_t1";
 const char *password = "12345678";
+
+const char* networkName = "Amr naguib";
+const char* networkPswd = "11111111";
+
+const char* serverAddress = "192.168.85.158";
 const int localPort = 8888;
 
 WiFiServer server(localPort);
+// WiFiClient client;
 
 
 unsigned char packetBuffer[255]; //buffer to hold incoming packet
@@ -46,12 +52,15 @@ void setup(){
   Serial.print("Started program");
   time_new = millis();
   //Start server
+  // connectToWiFi(networkName, networkPswd);
+  // connectToServer(&client, serverAddress2, localPort);
   start_server();
 }
 
 void loop(){
   update_time();
   WiFiClient client = server.available();
+
   if(client){
     Serial.println("New Client");
     while(client.connected()){
@@ -66,5 +75,22 @@ void loop(){
   }else{
     stop();
   }
+
 }
+
+  // if(client){
+  //   Serial.println("New Client");
+  //   while(client.connected()){
+  //     // main loop
+  //     if (client.available()>= 8){
+  //       recv_bytes(&client, &mode, &speed1, &speed2, &gripper_mode);
+  //       client.flush();
+  //     }
+  //     motion_call();
+  //   }
+  //   Serial.println("Client dissconnected");
+  // }else{
+  //   stop();
+  // }
+
 

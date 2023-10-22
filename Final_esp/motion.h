@@ -1,14 +1,16 @@
 #ifndef _MOTION_H_
 #define _MOTION_H_
+//_________Libraries_________
+#include <Arduino.h>
 //_________Definitions_________
 // Motor A (left) connections
-#define enA 21
-#define in1 19
-#define in2 5
+#define enA 14
+#define in1 27
+#define in2 26
 // Motor B (right) connections
-#define enB 23
+#define enB 5
 #define in3 18
-#define in4 22
+#define in4 19
 // Encoder pins
 #define encoder1 34
 #define encoder2 35
@@ -46,6 +48,7 @@ extern short int speed2;
 void setup_pins();
 
 void forward();
+void backward();
 void stop();
 void motion_call();
 
@@ -54,7 +57,7 @@ void update_time();
 void get_rpm();
 
 //_________Interrupt_functions_________
-// void IRAM_ATTR countPulse1();
-// void IRAM_ATTR countPulse2();
+void IRAM_ATTR countPulse1();
+void IRAM_ATTR countPulse2();
 
 #endif

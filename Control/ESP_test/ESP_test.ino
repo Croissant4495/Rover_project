@@ -4,13 +4,13 @@
 
 // WIFI VARIABLES
 // WiFi network name and password:
-const char * networkName = "Galaxy A34";
-const char * networkPswd = "1234567@";
+const char * networkName = "Electra";
+const char * networkPswd = "";
 
 //IP address to send UDP data to:
 // either use the ip address of the server or 
 // a network broadcast address
-const char * udpAddress = "192.168.1.9";
+const char * udpAddress = "10.3.1.105";
 const int udpPort = 8888;
 
 //Are we currently connected?
@@ -53,7 +53,6 @@ void fromBytes(unsigned char *byteArray, short int* mode, short int* motion){
   *mode = (short int)(byteArray[1] << 8 | byteArray[0]);
 }
 
-z
 void setup(){
   // Initilize hardware serial:
   Serial.begin(9600);

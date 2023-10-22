@@ -27,6 +27,18 @@ void forward() {
   // set both motors to forward
   digitalWrite(in1, HIGH);
   digitalWrite(in2, LOW);
+  digitalWrite(in3, LOW);
+  digitalWrite(in4, HIGH);
+}
+
+void backward() {
+  // set speed of movement
+  analogWrite(enA, speed1);
+  analogWrite(enB, speed2);
+
+  // set both motors to forward
+  digitalWrite(in1, LOW);
+  digitalWrite(in2, HIGH);
   digitalWrite(in3, HIGH);
   digitalWrite(in4, LOW);
 }
@@ -81,6 +93,8 @@ int get_dist(){
 void motion_call(){
   if (mode == 1){
     forward();
+  }else if(mode == 2){
+    backward();
   }else if(mode == 0){
     stop();
   }
@@ -94,14 +108,14 @@ void motion_call(){
   // }
 }
 
-// void IRAM_ATTR countPulse1() {
-//   counter1++;
-// }
+void IRAM_ATTR countPulse1() {
+  counter1++;
+}
 
-// void IRAM_ATTR countPulse2() {
-//   if(  digitalRead (encoder2) && (micros()-debounce > 500) && digitalRead (encoder2) ) { 
-//         debounce = micros();
-//         counter2 ++;
-//       }
-//         else ; 
-// }
+void IRAM_ATTR countPulse2() {
+  if(  digitalRead (encoder2) && (micros()-debounce > 500) && digitalRead (encoder2) ) { 
+        debounce = micros();
+        counter2 ++;
+      }
+        else ; 
+}

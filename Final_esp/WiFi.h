@@ -17,10 +17,18 @@ extern unsigned char packetBuffer[255]; //buffer to hold incoming packet
 extern unsigned char sendArray[255];
 
 //_________WIFI_functions_________
-void toBytes(unsigned char *byteArray, short int var1);
-void fromBytes(unsigned char *byteArray, short int* var1, short int* var2, short int* var3, short int* var4);
+
+// Server code
 void start_server();
 
+// client code
+void connectToWiFi(const char * ssid, const char * pwd);
+void WiFiEvent(WiFiEvent_t event);
+void connectToServer(WiFiClient* client_ptr, IPAddress server_address, const char port_num);
+
+// packets manager
+void toBytes(unsigned char *byteArray, short int var1);
+void fromBytes(unsigned char *byteArray, short int* var1, short int* var2, short int* var3, short int* var4);
 void send_packet();
 void recv_bytes(WiFiClient* client_ptr, short int* var1, short int* var2, short int* var3, short int* var4);
 #endif

@@ -14,6 +14,46 @@ void start_server(){
   Serial.println("Server started");
 }
 
+// Connect as a client
+void connectToWiFi(const char * ssid, const char * pwd){
+  Serial.println("Connecting to WiFi network: " + String(ssid));
+
+  // delete old config
+  WiFi.disconnect(true);
+  //register event handler
+  WiFi.onEvent(WiFiEvent);
+  
+  //Initiate connection  
+  WiFi.mode(WIFI_STA);                                                                
+  WiFi.begin(ssid, pwd);
+  Serial.println("Waiting for WIFI connection...");
+}
+
+//wifi event handler
+void WiFiEvent(WiFiEvent_t event){
+    switch(event) {
+      case ARDUINO_EVENT_WIFI_STA_GOT_IP:
+          //When connected set 
+          Serial.print("WiFi connected! IP address: ");
+          Serial.println(WiFi.localIP());
+          break;
+      case ARDUINO_EVENT_WIFI_STA_DISCONNECTED:
+          Serial.println("WiFi lost connection");
+          break;
+      default: break;
+    }
+}
+
+void connectToServer(WiFiClient* client_ptr, IPAddress server_address, const char port_num){
+  // connect to server
+  Serial.println("Connecting");
+  if(client_ptr->connect(server_address, port_num)){
+    Serial.println("Connected to server");
+    client_ptr->write("c");
+  }
+
+}
+
 void toBytes(unsigned char *byteArray, short int var1) {
     // mode
     byteArray[0] = (unsigned char)(var1 & 0xFF); 
